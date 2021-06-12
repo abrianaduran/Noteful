@@ -1,69 +1,100 @@
 import React from 'react';
-import { Route, Link } from 'react-router-dom'; 
-import DummyStore from './DummyStore';
+import { Route, Link } from 'react-router-dom';
 import ListNotes from './ListNotes';
 import ListFolders from './ListFolders';
 import NoteContent from './NoteContent';
 import NoteNav from './NoteNav';
+import './App.css'
+import ApiContext from './ApiContext';
+import config from './config';
 
 export default class App extends React.Component {
   state = {
-    DummyStore,
-};
+    notes: [],
+    folders: [],
+  };
 
-renderNav() {  
-  return (
-    <>
-  <Route exact path='/'>
-    <ListFolders folders={this.state.DummyStore.folders}/>
-  </Route>
-  <Route path='/folder:folderId'> 
-    <ListFolders folders={this.state.DummyStore.folders}/>
-  </Route>
-  <Route path='/note/:noteId'>
-    <NoteNav notes={this.state.DummyStore.notes}/>
-  </Route>
+  componentDidMount() {
+    Promise.all([
+      fetch(`${config.API_ENDPOINT}/notes`),
+      fetch(`${config.API_ENDPOINT}/folders`)
+    ])
+      .then(([notesRes, foldersRes]) => {
+        if (!notesRes.ok)
+          return notesRes.json().then(e => Promise.reject(e));
+        if (!foldersRes.ok)
+          return foldersRes.json().then(e => Promise.reject(e));
 
-  {/* <Route path='/addfolder' component={NoteNav} />
-  <Route path='/addnote' component={NoteNav} /> */}
-    </>
-  )
-} 
-renderMain() {
-  console.log('DummyStore rendermain notes', this.state.DummyStore.notes)
-  return (
-    <>
-  <Route path='/'>
-    <ListNotes notes={this.state.DummyStore.notes}/>
-  </Route>
-  <Route path='/folder:folderId'> 
-    <ListNotes />
-  </Route>
-  <Route path='/note/:noteId'>
-    <NoteContent notes={this.state.DummyStore.notes}
-      //this needs to loop through the notes and find a match
-      //using noteId
-    />
-  </Route>
-    </>
-  )
-}
+        return Promise.all([notesRes.json(), foldersRes.json()]);
+      })
+      .then(([notes, folders]) => {
+        this.setState({ notes, folders })
+      })
+      .catch(error => {
+        console.error({ error });
+      })
+  }
 
-  //<Route path="/" render={() => <ListNotes />, </ListFolders />} />
-  //<Route path="/folder/:folderId" render={() => <ListNotes />, <ListFolders />} />
-  //<Route path="/note/:noteId" render={() => <NoteContent />, <NoteNav/>} />
+  handleDeleteNote = noteId => {
+    this.setState({
+      notes: this.state.notes.filter(note => note.id !== noteId)
+    });
+  };
 
-  //<Route path="/add-folder" render={() => <NoteNav />, <AddFolder />} />
-  //<Route path="/add-folder" render={() => <NoteNav />, <AddNote />} />
-
-
-  render () {
+  renderNav() {
     return (
-      <div>
-        <nav>{this.renderNav()}</nav> 
-        <header><h1><Link to='/'>Noteful</Link></h1></header> 
-        <main>{this.renderMain()}</main>
-      </div>
+      <>
+        {['/', '/folder/:folderId'].map(path => (
+          <Route
+            exact
+            key={path}
+            path={path}
+            component={ListFolders}
+          />
+        ))}
+        <Route path="/note/:noteId" component={NoteNav} />
+        <Route path="/add-folder" component={NoteNav} />
+        <Route path="/add-note" component={NoteNav} />
+      </>
+    );
+  }
+  renderMain() {
+    return (
+      <>
+        {['/', '/folder/:folderId'].map(path => (
+          <Route
+            exact
+            key={path}
+            path={path}
+            component={ListNotes}
+          />
+        ))}
+        <Route path="/note/:noteId" component={NoteContent} />
+      </>
     )
   }
+
+  render() {
+    const value = {
+      notes: this.state.notes, 
+      folders: this.state.folders, 
+      deleteNote: this.handleDeleteNote
+    };
+    return (
+      <ApiContext.Provider value={value}>
+        <div className='App'>
+          <header><h1><Link to='/'>Noteful</Link></h1></header>
+          <div className='not__header'>
+            <div className='nav__sidebar'>
+              <nav>{this.renderNav()}</nav>
+            </div>
+            <div className='main'>
+              <main>{this.renderMain()}</main>
+            </div>
+          </div>
+        </div>
+      </ApiContext.Provider>
+    );
+  }
 }
+//https://github.com/Thinkful-Ed/noteful-client/blob/implement-design-and-routing/src/App/App.js
