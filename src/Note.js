@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import './Note.css'
 import config from './config' 
 import ApiContext from './ApiContext'
-import Button from './Button'
-// import { format } from 'date-fns'
+import { format } from 'date-fns'
+import NoteError from './NoteError'
+import PropTypes from 'prop-types'
 
 export default class Note extends React.Component {
     static defaultProps ={
@@ -14,8 +14,6 @@ export default class Note extends React.Component {
 
     handleDelete = e => {
         e.preventDefault() 
-        console.log('handleDelete')
-        console.log('noteId', this.props.id)
         const noteId = this.props.id 
 
         fetch(`${config.API_ENDPOINT}/notes/${noteId}`, {
@@ -44,6 +42,7 @@ export default class Note extends React.Component {
     return (
         
         <div className='list__item'>
+            <NoteError>
             <Link to={`/note/${id}`}>
                 <h2>{name}</h2>
             </Link> 
@@ -55,10 +54,18 @@ export default class Note extends React.Component {
           remove
         </button>
             <h3>
-                Last Modified :
-                {/* {format(modified, 'Do MMM YYYY')} */}
+                Last Modified : {modified}
+                {/* {format(modified, 'MMM')} */}
             </h3>
+            </NoteError>
         </div>
     )
     }
+}
+
+Note.propTypes = {
+    onDeleteNote: PropTypes.func.isRequired,
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    modified: PropTypes.string.isRequired
 }

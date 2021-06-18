@@ -7,6 +7,8 @@ import NoteNav from './NoteNav';
 import './App.css'
 import ApiContext from './ApiContext';
 import config from './config';
+import AddFolder from './AddFolder'; 
+import AddNote from './AddNote';
 
 export default class App extends React.Component {
   state = {
@@ -70,6 +72,8 @@ export default class App extends React.Component {
           />
         ))}
         <Route path="/note/:noteId" component={NoteContent} />
+        <Route path="/add-folder" component={AddFolder} />
+        <Route path='/add-note' component={AddNote} />
       </>
     )
   }
