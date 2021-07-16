@@ -51,14 +51,21 @@ export default class NoteContent extends React.Component {
         console.log(note.modified)
         return (
             <div className='note__details'>
-                
+
                 <h2>{note.name}</h2>
-                
+
                 <h3>
                     Last Modified :{note.modified}
-                {/* {format(modified, 'Do MMM YYYY')} */}
+                    {/* {format(modified, 'Do MMM YYYY')} */}
                 </h3>
                 <p className='note__content'>{note.content}</p>
+                <Button
+                    tag={Link}
+                    to={`/edit/${note.id}`}
+                    type='button'
+                >
+                    Edit Note
+                </Button>
                 <button
                     className='delete__button'
                     type='button'
@@ -66,7 +73,7 @@ export default class NoteContent extends React.Component {
                 >
                     remove
                 </button>
-                
+
             </div>
         )
     }

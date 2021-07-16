@@ -9,6 +9,8 @@ import ApiContext from './ApiContext';
 import config from './config';
 import AddFolder from './AddFolder'; 
 import AddNote from './AddNote';
+import EditNote from './EditNote';
+import EditFolder from './EditFolder';
 
 export default class App extends React.Component {
   state = {
@@ -57,6 +59,7 @@ export default class App extends React.Component {
         <Route path="/note/:noteId" component={NoteNav} />
         <Route path="/add-folder" component={NoteNav} />
         <Route path="/add-note" component={NoteNav} />
+        
       </>
     );
   }
@@ -74,15 +77,40 @@ export default class App extends React.Component {
         <Route path="/note/:noteId" component={NoteContent} />
         <Route path="/add-folder" component={AddFolder} />
         <Route path='/add-note' component={AddNote} />
+        <Route path="/edit/:noteId" component={EditNote} /> 
+        <Route path="/edit/:folderId" component={EditFolder} />
       </>
     )
   }
+  updateFolder = updatedFolder => {
+    const newFolders = this.state.folders.map(f => (f.id === updatedFolder.id)
+    ? updatedFolder 
+    : f 
+    )
+    this.setState({
+      folders: newFolders
+    })
+  };
+  updateNote = updatedNote => {
+    const newNotes = this.state.notes.map(n => (n.id === updatedNote.id)
+    ? updatedNote
+    : n
+    )
+    this.setState({
+      notes: newNotes
+    })
+  };
 
   render() {
     const value = {
       notes: this.state.notes, 
       folders: this.state.folders, 
-      deleteNote: this.handleDeleteNote
+      deleteNote: this.handleDeleteNote,
+      deleteFolder: this.deleteFolder,
+      addFolder: this.addFolder,
+      addNote: this.addNote,
+      updateFolder: this.updateFolder,
+      updateNote: this.updateNote
     };
     return (
       <ApiContext.Provider value={value}>

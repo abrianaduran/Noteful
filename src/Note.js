@@ -46,6 +46,13 @@ export default class Note extends React.Component {
             <Link to={`/note/${id}`}>
                 <h2>{name}</h2>
             </Link> 
+            <Button
+                tag={Link}
+                to={`/edit/${note.id}`}
+                type='button'
+              >
+                Edit Note
+              </Button>
         <button
           className='delete__button'
           type='button'
